@@ -9,10 +9,150 @@
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <h1>Example Student's Assignment 1!</h1>
+
+    <h1>Blink Assignment</h1>
     <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 1!</p>
+      <img src="imgs/BlinkCover.jpg" />
+      <div>
+        <p>Assigment 1 Documentation:</p><br>
+        <p>Octavio Badillo</p><br>
+        <p>January 12th, 2025</p><br>
+        <p>HCDE 439</p><br>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="schematic">
+        <h3>Schematics & Resistors</h3>
+        <div>
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/GreenLED.jpg">
+              <img src="imgs/RedLED.jpg">
+              <article>
+                For both the Green and Red LED schematics, they are connected
+                to their respective pins (pins 13 and 12), each through a 200-ohm
+                resistor. With a voltage drop of 1.8 V due to their LED color type,
+                160 ohms is required. The closest standard resistor value is 200
+                ohms, which provides some additional leeway.
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/BlueLED.jpg">
+              <article>
+                For the Blue LED schematic, it is connected to pin 11 on the Arduino.
+                With a larger voltage drop compared to the green and red LEDs (3.3 V),
+                the required resistance must be recalculated. Since the blue LED
+                consumes more energy, the resistor has less voltage to dissipate.
+                Using Ohm's law, it is determined that 85 ohms of resistance is
+                needed. The closest resistor available in our kit is 100 ohms,
+                which will suffice and provide some additional cushion.
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="code">
+        <h3>Code Structure</h3>
+        <section>
+          <pre>
+            /*
+            Octavio Badillo
+            1/12/2025
+            A program that blinks 3 LEDs on a breadboard by turning their
+            respective pins off and on at a specified rate.
+            */
+
+            // Global Variables
+            int timer = 10; // Delay time in milliseconds for blinking the LEDs
+
+            // Iterates and initializes each respective pin in the pins array
+            void setup() {
+              for (int i = 11; i < 14; i++) { // Loop through pins 11, 12, and 13
+                pinMode(i, OUTPUT); // Set each pin as an output
+              }
+            }
+
+            // Runs a continuous loop to turn on and off each pin with a specified delay
+            void loop() {
+              for (int i = 11; i < 14; i++) { // Loop through pins 11, 12, and 13 in ascending order
+                digitalWrite(i, HIGH); // Turn the current pin ON
+                delay(timer); // Wait for the specified delay
+                digitalWrite(i, LOW); // Turn the current pin OFF
+                delay(timer); // Wait for the specified delay
+              }
+            }
+          </pre>
+        </section>
+      </div>
+
+      <div class="circuit">
+        <h3>Circuits in Action!</h3>
+        <img src="gifs/BlinkCircuit.gif"/>
+      </div>
+
+      <div class="questions">
+        <h3>Additional Questions</h3>
+        <section>
+          <h4>
+            Q1: Draw a graph where the X axis is time and the Y axis is voltage
+            across the LEDs. Draw a line for each of your 3 LEDs.
+          </h4>
+          <img class="graph" src="imgs/AQ1.jpg">
+        </section>
+
+        <section>
+          <h4>
+            Q2: How many LEDs could you blink independently with your Arduino?
+            How much current would that draw?
+          </h4>
+          <div class="questionsInner">
+            <img class="datasheet" src="imgs/ArduinoData.png">
+            <article>
+              If the LEDs run independently and sequentially, as they do in the
+              current setup, the current is allocated to one LED at a time. In
+              this case, the number of LEDs you can blink is limited by the number
+              of GPIO ports, which is 14 on the Arduino UNO (or 15 if you include
+              the 5V port, though it wouldn’t blink). Making the total current
+              draw to still be 0.20mA.
+              <br><br>
+              However, if multiple LEDs were running at the same time, more current
+              would need to be allocated. Referring to the ATmega328P datasheet
+              used in the Elegoo Arduino UNO R3, the total current limit for the
+              VCC and GND pins, which essentially powers and run the entire
+              microcontroller, is 200 mA. Since each LED typically draws 20 mA,
+              a total of 10 LEDs could be powered at the same time, with each LED
+              running independently. Going past this limit could damage the
+              microcontroller permanently.
+              <br><br>
+              <a href="https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf"> ATmega328P Datasheet</a>
+            </article>
+          </div>
+        </section>
+
+        <section>
+          <h4>
+            Q3: How fast do you need to blink your LEDs until you no longer can
+            tell that they are blinking?
+          </h4>
+          <div class="questionsInner">
+            <article>
+              For me, when tweaking the timer and reducing it in increments of 1,
+              I found that I could still make out the blinks at 4 milliseconds.
+              However, as soon as I brought the timer to 3 milliseconds, the
+              blinking appeared completely still as it blinks so fast
+              that I could no longer process the changes in the LEDs brightness.
+            </article>
+          </div>
+        </section>
+
+      </div>
+
     </div>
   </body>
 </html>
