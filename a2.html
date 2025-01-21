@@ -4,15 +4,159 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+    <title>Octavio's HCDE 439 Physical Computing Page!</title>
 
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <h1>Example Student's Assignment 2!</h1>
+
+    <h1>Fade Assignment</h1>
     <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 2!</p>
+      <img src="imgs/FadeCover.png" />
+      <div>
+        <p>Assigment 2 Documentation:</p><br>
+        <p>Octavio Badillo</p><br>
+        <p>January 20th, 2025</p><br>
+        <p>HCDE 439</p><br>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="schematic">
+        <h3>Schematics & Resistors</h3>
+        <div>
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/FadeRedLED.jpg">
+              <img src="imgs/FadeYellowLED.jpg">
+              <article>
+                For both the Red and Yellow LED schematics, they are connected
+                to their respective pins (pins 12 and 13), each with a 200-ohm
+                resistor. Given the known voltage drop for their color, which is
+                1.8V, 160 ohms of resistance is required. However, the closest
+                standard resistor value available is 200 ohms, so it is used.
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/FadeWhiteLED.jpg">
+              <article>
+                Opposite to the Yellow and Red LEDs, the White LED has a voltage
+                drop of 3.3V. Since the White LED requires more power, the
+                resistance is lower, as shown in the calculations, which only
+                require 85 ohms of resistance. However, similar to the previous
+                LEDs, we use the closest resistor value available, which is
+                the 100-ohm resistor.
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/FadeButtonjpg.jpg">
+              <article>
+                The button, being the newest component for this assignment, does
+                not have a voltage drop like the LEDs. Since we aim to limit the
+                current to 20mA, calculating the required resistance results to
+                250 ohms. However, we use a 330-ohm resistor instead, as that is
+                the closest value available. Ensuring the circuit
+                remains safe when the button is pressed, completing the circuit
+                and allowing current to flow without exceeding its limits.
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="code">
+        <h3>Code Structure</h3>
+        <section>
+          <pre>
+            /*
+            Octavio Badillo
+            1/20/2025
+            A program that controls 3 LEDs on a breadboard. The white LED turns on
+            when the button is not pressed, while the red and yellow LEDs dim to a
+            specified brightness when the button is pressed.
+            */
+
+            // Constants
+            const int buttonOut = 2; // Output for the button
+            const int buttonIn = 3; // Input for the button
+            const int whiteLED = 11; // Output for the white LED
+            const int redLED = 12; // Output for the red LED
+            const int yellowLED = 13; // Output for the yellow LED
+
+            // Pin Arrays
+            const int setupPins[] = {buttonOut, whiteLED, redLED, yellowLED}; // Array to hold all LED pins
+            const int fadePins[] = {redLED, yellowLED}; // Array to hold red and yellow LED pins for fading
+
+            // Variables
+            int buttonState = 0; // Variable to store the current state of the button
+
+            // Initialize input and output pins for button and LEDs
+            void setup() {
+              pinMode(buttonIn, INPUT); // Set the button pin as an input
+              for (int i = 0; i < 4; i++) { // Loop through the setup pins array
+                pinMode(setupPins[i], OUTPUT); // Set each setup pin as an output
+              }
+            }
+
+            // Continuously check the button state and adjust LEDs with respect to the button state
+            void loop() {
+              digitalWrite(2, HIGH); // Provide constant power to the button circuit to detect when pressed
+              buttonState = digitalRead(buttonIn); // Read the current state of the button
+
+              if (buttonState == HIGH) { // Check if the button is pressed
+                digitalWrite(whiteLED, LOW); // Turn off the white LED
+                for (int i = 0; i < 2; i++) { // Loop through the red and yellow LEDs
+                  analogWrite(fadePins[i], 130); // Set the brightness of each LED to 130
+                }
+              } else { // If the button is not pressed
+                digitalWrite(whiteLED, HIGH); // Turn on the white LED
+                for (int i = 0; i < 2; i++) { // Loop through the red and yellow LEDs
+                  digitalWrite(fadePins[i], LOW); // Turn off the red and yellow LEDs
+                }
+              }
+            }
+          </pre>
+        </section>
+      </div>
+
+      <div class="circuit">
+        <h3>Fade Circuit in Action!</h3>
+        <img src="gifs/FadeCircuit.gif"/>
+      </div>
+
+      <div class="questions">
+        <h3>Additional Questions</h3>
+        <section>
+          <h4>
+            Q1: Draw a chart where the X axis is time and the Y axis is voltage.
+             Draw 3 lines representing the voltage across an LED with
+             analogWrite(led, 64), analogWrite(led, 128), and analogWrite(led,255).
+          </h4>
+          <img class="graph" src="imgs/AQ1.jpg">
+        </section>
+
+        <section>
+          <h4>
+            Q2: Given your schematic, circuit, and firmware, assuming the only
+            thing that draws current is your LEDs, how long would your circuit
+            run if powered by a 1200 mAh battery?
+          </h4>
+          <div class="questionsInner">
+            <article>
+              Text
+            </article>
+          </div>
+        </section>
+
+      </div>
+
     </div>
   </body>
 </html>
