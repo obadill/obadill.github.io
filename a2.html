@@ -32,10 +32,10 @@
               <img src="imgs/FadeYellowLED.jpg">
               <article>
                 For both the Red and Yellow LED schematics, they are connected
-                to their respective pins (pins 12 and 13), each with a 200-ohm
+                to their respective pins (pins 12 and 13), each with a 220-ohm
                 resistor. Given the known voltage drop for their color, which is
                 1.8V, 160 ohms of resistance is required. However, the closest
-                standard resistor value available is 200 ohms, so it is used.
+                standard resistor value available is 220 ohms, so it is used.
               </article>
             </div>
           </section>
@@ -139,7 +139,7 @@
              Draw 3 lines representing the voltage across an LED with
              analogWrite(led, 64), analogWrite(led, 128), and analogWrite(led,255).
           </h4>
-          <img class="graph" src="imgs/AQ1.jpg">
+          <img class="graph" src="imgs/FadeGraph.jpg">
         </section>
 
         <section>
@@ -149,8 +149,19 @@
             run if powered by a 1200 mAh battery?
           </h4>
           <div class="questionsInner">
+            <img class="datasheet" src="imgs/FadeQ2.jpg">
             <article>
-              Text
+              When considering this question, I considered two scenarios based on
+              whether the button is pressed continuously or not. In my circuit,
+              there is always at least one LED on. If the white LED remains on
+              the entire time, the battery would last approximately 70.59 hours.
+              When the button is pressed, the red and yellow LEDs dim at a level
+              set in the software (130 in my case), which reduces their current
+              draw. If the button were held continuously, the battery life
+              increases to around 84.15 hours, giving about 14 extra hours.
+              While other scenarios, such as intervals of button presses, could
+              be calculated, this provides a good range for estimating the
+              battery life.
             </article>
           </div>
         </section>
