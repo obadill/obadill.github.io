@@ -117,6 +117,7 @@ h3 {
   border-radius: 10px;
   font-family: monospace;
   white-space: pre-wrap;
+  margin-bottom: 2vh;
 }
 
 .circuit {
