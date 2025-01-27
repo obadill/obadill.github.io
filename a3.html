@@ -33,7 +33,7 @@
                 For both the Blue and White LED schematics, they are connected
                 to their respective PWM pins (pins 5 and 6), each with a 100-ohm
                 resistor. Given the known voltage drop for their color, which is
-                3.3V, 850 ohms of resistance is required. However, the closest
+                3.3V, 85 ohms of resistance is required. However, the closest
                 standard resistor value available is 100 ohms, so it is used.
               </article>
             </div>
@@ -180,14 +180,14 @@
           where the photoresistor is connected, allowing the circuit to read variable resistance
           values as analog inputs.
           <br><br>
-          The timer and errorMargin are user-specified values. The timer is set to a moderate duration
+          The timer and errorMargin are user-specified values. The timer is set to a duration of
           (500ms) to ensure there is enough time for user input, such as adjusting light conditions
           during calibration, enabling the program to determine accurate sensorMin and sensorMax values.
           Without this delay, the program would complete calibration too quickly, potentially
           resulting in incorrect min/max values. The errorMargin sets a threshold for detecting
           significant deviations in sensor readings, triggering recalibration only when necessary.
           <br><br>
-          The constraion() function ensures that the current sensor value remains within the
+          The constrain() function ensures that the current sensor value remains within the
           calibrated range, preventing unexpected outlier values from affecting LED behavior. After
           constraining, the map() function scales the sensor value to the PWM range (0–255), where
           255 represents maximum brightness and 0 represents the LED being off.
@@ -253,8 +253,7 @@
               to the 10-bit output range of 0–1023. This would change the code to something like
               map(sensorValue, sensorMin, sensorMax, 1023, 0) to match the updated resolution. These
               would improve both reading values and smoother transitions when writing PWM signals, as
-              the increased bit depth would provide finer control over
-              both input and output.
+              the increased bit depth would provide better control over both input and output.
             </article>
           </div>
         </section>
