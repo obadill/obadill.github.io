@@ -28,13 +28,12 @@
         <div>
           <section>
             <div class="schematicInner">
-              <img src="imgs/BlueWhiteLEDs.jpg">
+              <img src="imgs/IOServio.jpg">
               <article>
-                For both the Blue and White LED schematics, they are connected
-                to their respective PWM pins (pins 5 and 6), each with a 100-ohm
-                resistor. Given the known voltage drop for their color, which is
-                3.3V, 85 ohms of resistance is required. However, the closest
-                standard resistor value available is 100 ohms, so it is used.
+                For the servo schematic, it is connect to its respective PWM pin
+                (pin 5) in order to be given a PWM signal of 0-255 by the photoresistor.
+                Furthermore, is also being connected to a 5V track and ground
+                provided by the Arduino.
               </article>
             </div>
           </section>
@@ -43,12 +42,11 @@
             <div class="schematicInner">
               <img src="imgs/IOPhotoresistor.jpg">
               <article>
-                For the photoresistor schematic it differs in comparison to the
-                simple LEDs. Connected to the 5V in order to always provide power
-                to the photoresistor, which is then read via an analog pin inside
-                the voltage divider. As we are simply reading an analog signal
-                from the photoresistor, we use a 10k-ohm resistor in order to
-                ensure the circuit is both safe and energy efficient.
+                For the photoresistor schematic it is connected to the 5V rail in
+                order to always receive a constant source of power for the photoresistor,
+                which is then read via an analog pin inside the voltage divider. As we are
+                simply reading an analog signal from the photoresistor, we use a 10k-ohm
+                resistor in order to ensure the circuit is both safe and energy efficient.
               </article>
             </div>
           </section>
@@ -64,10 +62,12 @@
           <div class="questionsInner">
             <article>
               In the voltage divider circuit, the measured voltage changes depending on the state of
-              the photoresistor. With the light off, the blue LED is off, and the white LED is on, the
-              voltage at the divider is 0.24V. When the light is on, the blue LED is on, the white LED is off,
-              and the voltage increases to 4.32V. These readings reflect the circuit's response to
-              the photoresistor's state role in controlling the voltage divider output based on light conditions.
+              the photoresistor. When the light is off, the servo is at angle 0, and the voltage at
+              the divider is 0.40V as measured with a multimeter. When the light is on, the servo
+              moves to angle 180, and the voltage at the divider increases to 4.42V. These readings
+              demonstrate the circuit's response to the photoresistor's role in controlling the
+              voltage divider output and dynamically adjusting the servo's position based on light
+              conditions.
             </article>
           </div>
         </section>
@@ -80,22 +80,23 @@
             /*
             Octavio Badillo
             1/27/2025
-            A program that calibrates a photoresistor and dynamically controls the brightness
-            of two LEDs on a breadboard based on the photoresistor's readings. The program
-            recalibrates the sensor range if the input deviates from a specfied allowed margin of
+            A program that calibrates a photoresistor and dynamically controls the position
+            of a servo motor on a breadboard based on the photoresistor's readings. The program
+            recalibrates the sensor range if the input deviates from a specified allowed margin of
             error.
             */
 
+            #include <Servo.h> // Servo library
+
             // Constants
-            const int whiteLED = 5; // White LED pin
-            const int blueLED = 6; // Blue LED pin
-            const int leds[] = {whiteLED, blueLED}; // Array of LED pins
+            const int servoPin = 5;  // Servo signal pin
 
             // Variables
             int timer = 500; // Delay time between readings during calibration
             int sensorMax = 0; // Maximum sensor value during calibration
             int sensorMin = 1023; // Minimum sensor value during calibration
             int errorMargin = 100; // Margin of Error for calibration
+            Servo servo; // Servo object to control the servo motor
 
             // Function to calibrate the sensor by finding min and max values
             void calibration() {
@@ -130,13 +131,11 @@
               Serial.begin(9600); // Initialize serial communication at 9600 baud
               calibration(); // Initial calibration
 
-              // Set the LED pins as OUTPUT
-              for (int i = 0; i < 2; i++) {
-                pinMode(leds[i], OUTPUT);
-              }
+              // Attach the servo to its set PWM pin (5)
+              servo.attach(servoPin);
             }
 
-            // Continuously adjust LED brightness based on sensor readings, with dynamic recalibration
+            // Continuously adjust servo position based on sensor readings, with dynamic recalibration
             void loop() {
               int val = analogRead(A0); // Read the analog value from pin A0
 
@@ -147,12 +146,15 @@
 
               // Constrain the sensor value to the calibrated range
               int sensVal = constrain(val, sensorMin, sensorMax);
-              // Map the constrained value to the PWM range (0-255)
-              int outVal = map(sensVal, sensorMin, sensorMax, 255, 0);
+              // Map the constrained value to the servo's angle range (0-180 degrees)
+              int angle = map(sensVal, sensorMin, sensorMax, 0, 180);
 
-              // Write the mapped values to LEDs
-              analogWrite(blueLED, 255 - outVal); // Blue LED is opposite of white LED
-              analogWrite(whiteLED, outVal); // White LED brightness is proportional to sensor value
+              // Print calculated sero angle
+              Serial.print("Current Angle: ");
+              Serial.println(angle);
+
+              // Move the servo to the calculated angle
+              servo.write(angle);
             }
           </pre>
         </section>
@@ -173,29 +175,33 @@
           Calibration Results:
           Sensor Min: 260
           Sensor Max: 948
+          Current Angle: 179
+          Current Angle: 0
         </section>
         <article>
-          The chosen pin values for the LEDs (5 and 6) correspond to their PWM capability, which is
-          essential for dynamically adjusting brightness. The analog pin A0 is used because it’s
-          where the photoresistor is connected, allowing the circuit to read variable resistance
-          values as analog inputs.
+          The chosen pin value for the servo (pin 5) corresponds to its PWM capability, which is
+          essential for controlling the servo's position. The analog pin A0 is used because it’s
+          where the photoresistor is connected, allowing the circuit to read variable resistance values
+          as analog inputs.
           <br><br>
-          The timer and errorMargin are user-specified values. The timer is set to a duration of
-          (500ms) to ensure there is enough time for user input, such as adjusting light conditions
-          during calibration, enabling the program to determine accurate sensorMin and sensorMax values.
+          The timer and errorMargin are user-specified values. The timer is set to a duration of (500ms)
+          to ensure there is enough time for user input, such as adjusting light conditions during
+          calibration, enabling the program to determine accurate sensorMin and sensorMax values.
           Without this delay, the program would complete calibration too quickly, potentially
           resulting in incorrect min/max values. The errorMargin sets a threshold for detecting
           significant deviations in sensor readings, triggering recalibration only when necessary.
           <br><br>
-          The constrain() function ensures that the current sensor value remains within the
-          calibrated range, preventing unexpected outlier values from affecting LED behavior. After
-          constraining, the map() function scales the sensor value to the PWM range (0–255), where
-          255 represents maximum brightness and 0 represents the LED being off.
+          The constrain() function ensures that the current sensor value remains within the calibrated
+          range, preventing unexpected outlier values from affecting the servo’s behavior. After
+          constraining, the map() function scales the sensor value to the servo's angle range
+          (0–180 degrees), where 0 represents the servo’s minimum position and 180 represents its
+          maximum position.
           <br><br>
-          The LED output logic is straightforward: the blue LED's brightness is the inverse of the white LED's
-          brightness. As the white LED gets brighter (outVal), the blue LED gets dimmer (255 - outVal),
-          creating a balanced visual effect.
-          </article>
+          The servo output logic is straightforward: the servo’s position is dynamically adjusted
+          based on the mapped value from the photoresistor’s readings. This ensures the servo responds
+          smoothly to changes in light levels, demonstrating a clear relationship between the photoresistor
+          input and the servo's motion.
+       </article>
       </div>
 
       <div class="circuit">
