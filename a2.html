@@ -56,15 +56,12 @@
 
           <section>
             <div class="schematicInner">
-              <img src="imgs/FadeButtonjpg.jpg">
+              <img src="imgs/FadeButton.jpg">
               <article>
                 The button, being the newest component for this assignment, does
-                not have a voltage drop like the LEDs. Since we aim to limit the
-                current to 20mA, calculating the required resistance results to
-                250 ohms. However, we use a 330-ohm resistor instead, as that is
-                the closest value available. Ensuring the circuit
-                remains safe when the button is pressed, completing the circuit
-                and allowing current to flow without exceeding its limits.
+                not have a voltage drop like the LEDs. However, we use a 10,000-ohm
+                resistor instead, ensuring the circuit is both safe but also efficient
+                when it comes to battery peservation.
               </article>
             </div>
           </section>
@@ -86,13 +83,14 @@
             // Constants
             const int buttonOut = 2; // Output for the button
             const int buttonIn = 3; // Input for the button
-            const int whiteLED = 11; // Output for the white LED
-            const int redLED = 12; // Output for the red LED
-            const int yellowLED = 13; // Output for the yellow LED
+            const int whiteLED = 9; // Output for the white LED
+            const int redLED = 10; // Output for the red LED
+            const int yellowLED = 11; // Output for the yellow LED
+            const int timer = 10; // Delay timer
 
             // Pin Arrays
-            const int setupPins[] = {buttonOut, whiteLED, redLED, yellowLED}; // Array to hold all LED pins
-            const int fadePins[] = {redLED, yellowLED}; // Array to hold red and yellow LED pins for fading
+            const int setupPins[] = {buttonOut, whiteLED, redLED, yellowLED}; // Array to hold all setup pins
+            const int fadePins[] = {whiteLED, redLED, yellowLED}; // Array to hold all LED pins for fading
 
             // Variables
             int buttonState = 0; // Variable to store the current state of the button
@@ -110,15 +108,22 @@
               digitalWrite(2, HIGH); // Provide constant power to the button circuit to detect when pressed
               buttonState = digitalRead(buttonIn); // Read the current state of the button
 
-              if (buttonState == HIGH) { // Check if the button is pressed
-                digitalWrite(whiteLED, LOW); // Turn off the white LED
-                for (int i = 0; i < 2; i++) { // Loop through the red and yellow LEDs
-                  analogWrite(fadePins[i], 130); // Set the brightness of each LED to 130
+              if (buttonState != HIGH) { // Check if the button is pressed
+                for (int i = 0; i < 3; i++) { // Loop through the LEDs
+                  digitalWrite(fadePins[i], LOW); // Turn off the LEDs
                 }
               } else { // If the button is not pressed
-                digitalWrite(whiteLED, HIGH); // Turn on the white LED
-                for (int i = 0; i < 2; i++) { // Loop through the red and yellow LEDs
-                  digitalWrite(fadePins[i], LOW); // Turn off the red and yellow LEDs
+                for(int i = 0; i < 255; i++) { // Incremenet through LED values
+                  for (int j = 0; j < 3; j++) { // Loop through the LEDs
+                    analogWrite(fadePins[j], i); // Set the brightness of each LED to current level
+                    delay(timer); // Delay for the LEDs
+                  }
+                }
+                for(int i = 255; i >= 0; i--) { // Decrement through LED values
+                  for (int j = 0; j < 3; j++) { // Loop through the LEDs
+                    analogWrite(fadePins[j], i); // Set the brightness of each LED to current level
+                    delay(timer); // Delay for the LEDs
+                  }
                 }
               }
             }
