@@ -28,7 +28,20 @@
         <div>
           <section>
             <div class="schematicInner">
-              <img src="imgs/IOServio.jpg">
+              <img src="imgs/IOWhiteLED.jpg">
+              <article>
+                The White LED has a voltage drop of 3.3V. Since the White LED
+                requires more power, the resistance is lower, as shown in the
+                calculations, which only require 85 ohms of resistance. However,
+                we use the closest resistor value available, which is the
+                100-ohm resistor.
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/IOServo.jpg">
               <article>
                 For the servo schematic, it is connect to its respective PWM pin
                 (pin 5) in order to be given a PWM signal of 0-255 by the photoresistor.
@@ -37,6 +50,7 @@
               </article>
             </div>
           </section>
+
 
           <section>
             <div class="schematicInner">
@@ -63,11 +77,12 @@
             <article>
               In the voltage divider circuit, the measured voltage changes depending on the state of
               the photoresistor. When the light is off, the servo is at angle 0, and the voltage at
-              the divider is 0.40V as measured with a multimeter. When the light is on, the servo
-              moves to angle 180, and the voltage at the divider increases to 4.42V. These readings
-              demonstrate the circuit's response to the photoresistor's role in controlling the
-              voltage divider output and dynamically adjusting the servo's position based on light
-              conditions.
+              the divider is 0.40V as measured with a multimeter. When the light is on, the servo moves
+              to angle 180, and the voltage at the divider increases to 4.42V. These readings demonstrate
+              the circuit's response to the photoresistor's role in controlling the voltage divider output
+              and dynamically adjusting the servo's position based on light conditions. Additionally,
+              when there is no light on the photoresistor, the LED is on, and when light is present,
+              the LED turns off, providing visual feedback that complements the servo's motion.
             </article>
           </div>
         </section>
@@ -81,15 +96,17 @@
             Octavio Badillo
             1/27/2025
             A program that calibrates a photoresistor and dynamically controls the position
-            of a servo motor on a breadboard based on the photoresistor's readings. The program
-            recalibrates the sensor range if the input deviates from a specified allowed margin of
-            error.
+            of a servo motor and the brightness of two LEDs on a breadboard based on the photoresistor's readings.
+            The program recalibrates the sensor range if the input deviates from a specified allowed margin of
+            error. Additionally, an LED is dynamically turned on whenever the photoresistor's readings reach the
+            calibrated maximum sensor value.
             */
 
             #include <Servo.h> // Servo library
 
             // Constants
-            const int servoPin = 5;  // Servo signal pin
+            const int servoPin = 5; // Servo signal pin
+            const int whiteLED = 6; // White LED pin
 
             // Variables
             int timer = 500; // Delay time between readings during calibration
@@ -133,9 +150,12 @@
 
               // Attach the servo to its set PWM pin (5)
               servo.attach(servoPin);
+
+              // Set the white LED as OUTPUT
+              pinMode(whiteLED, OUTPUT);
             }
 
-            // Continuously adjust servo position based on sensor readings, with dynamic recalibration
+            // Continuously adjust LED brightness based on sensor readings, with dynamic recalibration
             void loop() {
               int val = analogRead(A0); // Read the analog value from pin A0
 
@@ -146,6 +166,8 @@
 
               // Constrain the sensor value to the calibrated range
               int sensVal = constrain(val, sensorMin, sensorMax);
+              // Map the constrained value to the PWM range (0-255)
+              int outVal = map(sensVal, sensorMin, sensorMax, 255, 0);
               // Map the constrained value to the servo's angle range (0-180 degrees)
               int angle = map(sensVal, sensorMin, sensorMax, 0, 180);
 
@@ -155,6 +177,9 @@
 
               // Move the servo to the calculated angle
               servo.write(angle);
+
+              // Adjust the white LED's brightness inversely proportional to the sensor value
+              analogWrite(whiteLED, 255 - outVal);
             }
           </pre>
         </section>
@@ -180,28 +205,32 @@
         </section>
         <article>
           The chosen pin value for the servo (pin 5) corresponds to its PWM capability, which is
-          essential for controlling the servo's position. The analog pin A0 is used because it’s
-          where the photoresistor is connected, allowing the circuit to read variable resistance values
-          as analog inputs.
+          ssential for controlling the servo's position. The analog pin A0 is used because it’s
+          where the photoresistor is connected, allowing the circuit to read variable resistance
+          values as analog inputs.
           <br><br>
-          The timer and errorMargin are user-specified values. The timer is set to a duration of (500ms)
-          to ensure there is enough time for user input, such as adjusting light conditions during
-          calibration, enabling the program to determine accurate sensorMin and sensorMax values.
-          Without this delay, the program would complete calibration too quickly, potentially
+          The timer and errorMargin are user-specified values. The timer is set to a duration of
+          (500ms) to ensure there is enough time for user input, such as adjusting light conditions
+          during calibration, enabling the program to determine accurate sensorMin and sensorMax
+          values. Without this delay, the program would complete calibration too quickly, potentially
           resulting in incorrect min/max values. The errorMargin sets a threshold for detecting
           significant deviations in sensor readings, triggering recalibration only when necessary.
           <br><br>
           The constrain() function ensures that the current sensor value remains within the calibrated
           range, preventing unexpected outlier values from affecting the servo’s behavior. After
-          constraining, the map() function scales the sensor value to the servo's angle range
-          (0–180 degrees), where 0 represents the servo’s minimum position and 180 represents its
-          maximum position.
+          constraining, the map() function scales the sensor value to the servo's angle range (0–180 degrees),
+          where 0 represents the servo’s minimum position and 180 represents its maximum position.
           <br><br>
-          The servo output logic is straightforward: the servo’s position is dynamically adjusted
-          based on the mapped value from the photoresistor’s readings. This ensures the servo responds
+          The servo output logic is straightforward: the servo’s position is dynamically adjusted b
+          ased on the mapped value from the photoresistor’s readings. This ensures the servo responds
           smoothly to changes in light levels, demonstrating a clear relationship between the photoresistor
           input and the servo's motion.
-       </article>
+          <br><br>
+          Additionally, the white LED (pin 6) dynamically adjusts its brightness based on the
+          photoresistor's readings, with lower light levels resulting in higher brightness and vice versa.
+          This visual feedback complements the servo's movement, enhancing the circuit's overall
+          responsiveness to changes in light conditions.
+        </article>
       </div>
 
       <div class="circuit">
