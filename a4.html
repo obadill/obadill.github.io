@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>Octavio's HCDE 439 Physical Computing Page!</title>
+
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+
+    <h1>I/O Assignment</h1>
+    <div class="header">
+      <img src="imgs/A4/LibrariesCover.jpg" />
+      <div>
+        <p>Assigment 4 Documentation:</p><br>
+        <p>Octavio Badillo</p><br>
+        <p>February 3rd, 2025</p><br>
+        <p>HCDE 439</p><br>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="schematic">
+        <h3>Schematics & Resistors</h3>
+        <div>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/A4/A4CapSensor.jpg">
+              <article>
+                The capacitive sensor uses a 1 mega-ohm resistor, allowing for the
+                circuit to respond when touched. By touching the aluminum foil,
+                the capacitance changes, triggering a response in the circuit.
+                Higher resistance values could be used to detect proximity
+                instead of direct contact.
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/A4/A4Servo.jpg">
+              <article>
+                For the servo schematic, it is connect to its respective PWM pin
+                (pin 3) in order to be given a PWM signal of 0-255 by the photoresistor.
+                Furthermore, is also being connected to a 5V track and ground
+                provided by the Arduino.
+              </article>
+            </div>
+          </section>
+
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/A4/A4LCD.jpg">
+              <article>
+                The LCD display is the most intricate of the three circuits, as it uses a significant
+                number of GPIO ports on the Arduino. Most notably are three components that allow for its
+                functionality. A potentiometer connected to the "V0" pin allows for adjusting the
+                screen's contrast, ensuring the text is visible by adjustment. Second, a 220-ohm resistor
+                serves as a current-limiting resistor to protect the LCD's backlight from burning
+                out. Lastly, the LCD uses only four data pins (Pins 5-8) to communicate with the Arduino.
+              </article>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+
+      <div class="code">
+        <h3>Code Structure</h3>
+        <section>
+          <pre>
+            /*
+            Octavio Badillo
+            2/3/2025
+            A program that calibrates a capacitive touch sensor and dynamically controls the position
+            of a servo motor based on touch intensity.
+            */
+
+            // Libraries
+            #include <CapacitiveSensor.h> // Library for capacitive touch sensing
+            #include <LiquidCrystal.h> // Library for LCD display control
+            #include <Servo.h> // Library for servo motor control
+
+            // Constants
+            const int errorMargin = 100; // Allowed margin of error before recalibration
+            const int servoPin = 3; // Servo signal pin
+
+            // Variables
+            int sensorMin = 1023; // Initial minimum value for calibration
+            int sensorMax = 0; // Initial maximum value for calibration
+
+            // Objects
+            LiquidCrystal lcd(10, 9, 8 ,7, 6, 5); // LCD object connected to pins
+            CapacitiveSensor cs_2_4 = CapacitiveSensor(2, 4); // Capacitive sensor object (Send Pin 2, Receive Pin 4)
+            Servo myServo; // Servo motor object
+
+            // Calibrates the capacitive sensor by determining Min & Max values
+            void calibration() {
+              // Reset sensor Min & Max variables
+              sensorMin = 1023;
+              sensorMax = 0;
+
+              // Display calibration process to user
+              lcd.clear();
+              lcd.print("Calibrating...");
+              delayedClear(1000);
+
+              // Take 10 sensor readings for calibration
+              for (int i = 1; i <= 10; i++) {
+                long val = cs_2_4.capacitiveSensor(30);
+                if (val < sensorMin) sensorMin = val; // Update sensorMin if value is lower
+                if (val > sensorMax) sensorMax = val; // Update sensorMax if value is higher
+
+                // Display the current reading to the LCD
+                lcd.print("Reading:");
+                lcd.setCursor(9, 0);
+                lcd.print(i);
+                delayedClear(500);
+              }
+
+              // Display Calibration Completed message
+              lcd.clear();
+              lcd.print("Calibration Done");
+              delayedClear(2000);
+
+              // Display minimum calibrated value
+              lcd.print("Min: ");
+              lcd.print(sensorMin);
+              delayedClear(2000);
+
+              // Display maximum calibrated value
+              lcd.print("Max: ");
+              lcd.print(sensorMax);
+              delayedClear(2000);
+            }
+
+            // Initializes the LCD, capacitive sensor, and servo
+            void setup() {
+              Serial.begin(9600); // Start serial communication for debugging
+
+              cs_2_4.set_CS_AutocaL_Millis(0xFFFFFFFF); // Disable auto-calibration
+
+              lcd.begin(16,2); // Initialize the 16x2 LCD display
+              lcd.print("System Booting.."); // Display startup message on LCD
+              delay(1000); // Delay for the message to be read
+
+              myServo.attach(servoPin); // Attach the servo to its defined pin
+              myServo.write(0); // Set the servo to its initial position
+
+              calibration(); // Perform initial calibration
+            }
+
+            // Reads sensor values, recalibrates if needed, and adjusts the servo
+            void loop() {
+              long sensorVal = cs_2_4.capacitiveSensor(30);
+
+              // Check if the current value exceeds the set error margin; recalibrate if necessary
+              if (sensorVal > sensorMax + errorMargin || sensorVal < sensorMin - errorMargin) {
+                calibration();
+              }
+
+              // Constrain the sensor value to the calibrated range
+              sensorVal = constrain(sensorVal, sensorMin, sensorMax);
+              // Map the constrained value to the servo's angle range (0-180 degrees)
+              int angle = map(sensorVal, sensorMin, sensorMax, 0, 180);
+
+              // Display the servo angle on the LCD
+              lcd.print("Servo Angle:");
+              lcd.setCursor(0, 1);
+              lcd.print(angle);
+
+              // Move the servo to the calculated angle
+              myServo.write(angle);
+              delayedClear(100);
+            }
+
+            // Delays the program execution for a specified time before clearing the LCD screen.
+            // int time - The delay time in milliseconds before clearing the LCD.
+            void delayedClear(int time) {
+              delay(time); // Wait for the specified time
+              lcd.clear(); // Clear the LCD screen
+            }
+          </pre>
+        </section>
+
+        <article>
+          The chosen servo pin (pin 3) supports PWM, allowing for control over the servo’s position
+          based on the capacitive sensor readings. The capacitive sensor is connected to pins
+          2 and 4, enabling it to detect touch intensity and provide an analog-like value for
+          dynamic control.
+          <br><br>
+          The errorMargin defines a threshold for detecting deviations in sensor readings, ensuring
+          recalibration only happens when necessary. Without it, tiny deviations could result in
+          unnecessary recalibrations. During calibration, the program captures sensorMin and sensorMax v
+          alues to establish a valid range for mapping touch input to servo motion.
+          <br><br>
+          The constrain() function ensures the sensor value remains within the calibrated range,
+          preventing outliers from affecting the servo’s response. The map() function then scales
+          the touch intensity to a servo angle between 0° and 180°, ensuring proportional movement
+          based on touch strength.
+          <br><br>
+          The LCD screen also provides real-time feedback, displaying the servo’s current position
+          and informing the user when calibration adn re-calibration are occuring.
+        </article>
+      </div>
+
+      <div class="circuit">
+        <h3>The Libraries Circuit</h3>
+        <img src="imgs/A4/LibrariesCircuit.jpg"/>
+      </div>
+
+      <div class="circuit">
+        <h3>Libraries Circuit in Action!</h3>
+        <img src="gifs/LibrariesCircuit.gif"/>
+      </div>
+
+      <div class="questions">
+        <section>
+          <h4>
+          Q1: Say you are using a servo motor you attach to pin 9. In your loop() you have the following code:
+            for (int i = 0; i &lt; 180; i++) { servo.write(i); delay(100); }
+            <br><br>
+            Draw a graph with the X axis in seconds, for two seconds, and the y-axis the voltage at pin 9 with
+            respect to ground.
+          </h4>
+          <div class="questionsInner">
+            <img class="datasheet" src="imgs/A4/A4Graph.jpg">
+            <article>
+              My graph shows the PWM signal from pin 9 as it drives the servo motor. We can infer the
+              servo will move from 0 to 20 degrees within the first 2 seconds. With the loop delaying
+              every 100ms, the PWM signal continues to oscillate between 0V and 5V, but the waveform
+              consistently completes its duty cycle every 20ms, as determined by the standard PWM frequency.
+            </article>
+          </div>
+        </section>
+
+        <section>
+          <h4>
+            Q2: Your input device is slightly broken, leading it to give us an erroneous reading 1% of the
+            time. How can we address this? Answer in (pseudo)code.
+          </h4>
+
+          <div class="code">
+            <section>
+              <pre>
+                /*
+                In the case that our data is erroneous by 1%, we can calibrate at the start by taking X amount
+                of readings. The higher X is, the longer calibration takes, but it reduces the chance that an
+                outlier falls outside the calibrated range. We continuously check for outliers in the loop,
+                and since errors are expected only 1% of the time, recalibration should rarely be triggered.
+                */
+
+                // Variables
+                int sensorMin = 1023; // Initial minimum value for calibration
+                int sensorMax = 0; // Initial maximum value for calibration
+
+                void calibration() {
+                  // Reset sensor Min & Max variables
+                  sensorMin = 1023;
+                  sensorMax = 0;
+
+                  // Take X amount of sensor readings for calibration
+                  for (int i = 1; i <= X ; i++) {
+                    long val = cs_2_4.capacitiveSensor(30);
+                    if (val < sensorMin) sensorMin = val;
+                    if (val > sensorMax) sensorMax = val;
+                  }
+                }
+
+                void setup() {
+                  ...
+                  calibration(); // Initial calibration
+                }
+
+                void loop() {
+                  long sensorVal = cs_2_4.capacitiveSensor(30);
+
+                  // Check if the current value exceeds current bounds; recalibrate if necessary
+                  if (sensorVal > sensorMax || sensorVal < sensorMin) {
+                    calibration();
+                  }
+                  ...
+                }
+              </pre>
+            </section>
+
+        </section>
+
+
+        <section>
+          <h4>
+            Q3: Your input device is slightly noisy, leading the measurement to randomly deviate from
+            the true measurement up or down by 10%. How can we address this? Answer in (pseudo)code.
+          </h4>
+
+          <div class="code">
+            <section>
+              <pre>
+                /*
+                In the case that our data is noisy and fluctuates randomly by +/- 10%, we can use an error margin.
+                Which accounts for expected variations, preventing unnecessary recalibrations caused by small
+                deviations. If the sensor value goes past the calibrated range plus the error margin, recalibration
+                is triggered. Allowing for stable operation while still detecting significant outliers.
+                */
+
+                // Constants
+                const int errorMargin = 100; // Allowed margin of error before recalibration
+
+                // Variables
+                int sensorMin = 1023; // Initial minimum value for calibration
+                int sensorMax = 0; // Initial maximum value for calibration
+
+                void calibration() {
+                  // Reset sensor Min & Max variables
+                  sensorMin = 1023;
+                  sensorMax = 0;
+
+                  // Take X amount of sensor readings for calibration
+                  for (int i = 1; i <= X ; i++) {
+                    long val = cs_2_4.capacitiveSensor(30);
+                    if (val < sensorMin) sensorMin = val;
+                    if (val > sensorMax) sensorMax = val;
+                  }
+                }
+
+                void setup() {
+                  ...
+                  calibration(); // Initial calibration
+                }
+
+                void loop() {
+                  long sensorVal = cs_2_4.capacitiveSensor(30);
+
+                  // Check if the current value exceeds the set error margin; recalibrate if necessary
+                  if (sensorVal > sensorMax + errorMargin|| sensorVal < sensorMin + errorMargin) {
+                    calibration();
+                  }
+                  ...
+                }
+              </pre>
+            </section>
+
+        </section>
+
+      </div>
+
+    </div>
+  </body>
+</html>
