@@ -139,6 +139,8 @@ h3 {
 
 .questions h4 {
   font-weight: 350;
+  margin-top: 2vh;;
+  margin-bottom: 1.5vh;
 }
 
 .graph, .questionsInner {

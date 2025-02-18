@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>Octavio's HCDE 439 Physical Computing Page!</title>
+
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+
+    <h1>High(er) Voltage and Transistors</h1>
+    <div class="header">
+      <img src="imgs/A5/A5Cover.jpg" />
+      <div>
+        <p>A5 Documentation:</p><br>
+        <p>Octavio Badillo</p><br>
+        <p>February 18th, 2025</p><br>
+        <p>HCDE 439</p><br>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="schematic">
+        <h3>Schematics</h3>
+        <div>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/A4/A4CapSensor.jpg">
+              <article>
+                The capacitive sensor uses a 1 mega-ohm resistor, allowing for the
+                circuit to respond when touched. By touching the aluminum foil,
+                the capacitance changes, triggering a response in the circuit.
+                Higher resistance values could be used to detect proximity
+                instead of direct contact.
+              </article>
+            </div>
+          </section>
+
+          <section>
+            <div class="schematicInner">
+              <img src="imgs/A4/A4Servo.jpg">
+              <article>
+                Text for the schematic
+              </article>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+
+      <div class="code">
+        <h3>Code Structure</h3>
+        <section>
+          <pre>
+            /*
+            Octavio Badillo
+            2/18/2025
+            A program that reads input from a capacitive sensor and controls an LED strip
+            through a transistor. If the sensor value exceeds a set threshold the LED strip turns on,
+            and vice versa.
+            */
+
+            // Libraries
+            #include <CapacitiveSensor.h>
+
+            // Ojbects
+            CapacitiveSensor cs_2_4 = CapacitiveSensor(2, 4); // Capacitive sensor object (Send Pin 2, Receive Pin 4)
+
+            // Variables
+            int transistorLEDS = 3; // Pin connected to transistor controlling LED strip
+            int sensorThreshold = 800; // Threshold for capacitive sensor comparison
+
+            // Initializes serial communication and setups the transistor pin
+            void setup() {
+              Serial.begin(9600);
+              pinMode(transistorLEDS, OUTPUT);
+            }
+
+            // Continuously reads the capacitive sensors value and controls the LED strip
+            void loop() {
+              long sensorVal = cs_2_4.capacitiveSensor(30); // Reads capacitive sensor value
+
+              // Compares sensor value to threshold and controls the LED strip accordingly
+              if(sensorVal > sensorThreshold) {
+                analogWrite(transistorLEDS, 255); // Turn LED strip ON
+              } else {
+                analogWrite(transistorLEDS, 0); // Turn LED strip OFF
+              }
+            }
+          </pre>
+        </section>
+      </div>
+
+      <div class="circuit">
+        <h3>The Higher Voltage Circuit</h3>
+        <img src="imgs/A4/LibrariesCircuit.jpg"/>
+      </div>
+
+      <div class="circuit">
+        <h3>Higher Voltage Circuit in Action!</h3>
+        <img src="gifs/LibrariesCircuit.gif"/>
+      </div>
+
+      <div class="questions">
+
+        <section>
+          <h4>
+            Q1: What is the absolute maximum amount of current between pins 2 and 3?
+            <a href="https://www.diodes.com/assets/Datasheets/DMT6009LCT.pdf">(N-Mosfet Transistor Datasheet)</a>
+          </h4>
+          <div class="questionsInner">
+            <article>
+              <br>
+              From the datasheet we find that the absolute maximum amount of current between pins 2 and 3 can be 37.2 A
+              <br><br>
+            </article>
+          </div>
+        </section>
+
+        <section>
+          <h4>
+            Q2: Draw a schematic for a circuit with using at least your arduino, a DC motor, a flyback diode, and
+            capacitors between power and ground. Find parts with datasheets you could use for each of these schematic
+            components.
+          </h4>
+          <div class="questionsInner">
+            <img class="datasheet" src="imgs/A4/A4Graph.jpg">
+            <article>
+              Text
+            </article>
+          </div>
+        </section>
+
+        <section>
+          <h4>
+            Q3: Draw a schematic using at least your arduino, this chip, and two motors. Write (pseudo)
+            code that shows how you would move the motors both forward, both back, then one forward one
+            back, and one back then forward. <a href="https://www.ti.com/product/L293D">(L293D Chip Datasheet)</a>
+          </h4>
+          <div class="questionsInner">
+            <img class="datasheet" src="imgs/A4/A4Graph.jpg">
+          </div>
+          <br>
+          <div class="code">
+            <section>
+              <pre>
+                  // Q3 Pseudo Code
+              </pre>
+            </section>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </body>
+</html>
