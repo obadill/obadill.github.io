@@ -42,9 +42,12 @@
 
           <section>
             <div class="schematicInner">
-              <img src="imgs/A4/A4Servo.jpg">
+              <img src="imgs/A5/A5Schematic.jpg">
               <article>
-                Text for the schematic
+                We use a 12V LED strip connected in series with a transistor, with the strip’s
+                negative pad connected to the transistor’s drain pin, which acts like a switch.
+                The transistor’s source is tied to ground, and its gate is controlled by an external
+                PWM signal on pin 3.
               </article>
             </div>
           </section>
@@ -66,7 +69,7 @@
             */
 
             // Libraries
-            #include <CapacitiveSensor.h>
+            #include &lt;CapacitiveSensor.h&gt;
 
             // Ojbects
             CapacitiveSensor cs_2_4 = CapacitiveSensor(2, 4); // Capacitive sensor object (Send Pin 2, Receive Pin 4)
@@ -98,12 +101,13 @@
 
       <div class="circuit">
         <h3>The Higher Voltage Circuit</h3>
-        <img src="imgs/A4/LibrariesCircuit.jpg"/>
+        <img src="imgs/A5/A5FullCircuit.jpg"/>
+        <img src="imgs/A5/A5CloserCircuit.jpg"/>
       </div>
 
       <div class="circuit">
         <h3>Higher Voltage Circuit in Action!</h3>
-        <img src="gifs/LibrariesCircuit.gif"/>
+        <img src="gifs/A5Circuit.gif"/>
       </div>
 
       <div class="questions">
@@ -129,9 +133,14 @@
             components.
           </h4>
           <div class="questionsInner">
-            <img class="datasheet" src="imgs/A4/A4Graph.jpg">
+            <img class="datasheet" src="imgs/A5/Q2Schematic.jpg">
             <article>
-              Text
+              Component Dataheets from Schematic:<br>
+              <a href="https://www.diodes.com/assets/Datasheets/DMT6009LCT.pdf">N-Mosfet Transistor</a><br>
+              <a href="/pdfs/A5/DC Motor.pdf">DC Motor</a><br>
+              <a href="/pdfs/A5/Diode.pdf">Flyback Diode</a><br>
+              <a href="/pdfs/A5/Electrolytic Capacitor.pdf">Electrolytic Capacitor</a><br>
+              <a href="/pdfs/A5/9V DC Battery.pdf">9V DC Battery</a><br>
             </article>
           </div>
         </section>
@@ -143,13 +152,68 @@
             back, and one back then forward. <a href="https://www.ti.com/product/L293D">(L293D Chip Datasheet)</a>
           </h4>
           <div class="questionsInner">
-            <img class="datasheet" src="imgs/A4/A4Graph.jpg">
+            <img class="datasheet" src="imgs/A5/Q3Schematic.jpg">
           </div>
           <br>
           <div class="code">
             <section>
               <pre>
-                  // Q3 Pseudo Code
+                /*
+                Q3 Pseudo Code
+                */
+
+                // Constants
+                int motorOneA = 3;
+                int motorOneB = 5;
+                int motorTwoA = 6;
+                int motorTwoB = 9;
+                int enableOne = 7;
+                int enableTwo = 8;
+
+                // Initialization
+                void setup() {
+                  pinMode(motorOneA, OUTPUT);
+                  pinMode(motorOneB, OUTPUT);
+                  pinMode(motorTwoA, OUTPUT);
+                  pinMode(motorTwoB, OUTPUT);
+                  pinMode(enableOne, OUTPUT);
+                  pinMode(enableTwo, OUTPUT);
+
+                  // Enable both motors
+                  digitalWrite(enableOne, HIGH);
+                  digitalWrite(enableTwo, HIGH);
+                }
+
+                // All Cases
+                void loop() {
+                  // Both Forward
+                  digitalWrite(motorOneA, HIGH);
+                  digitalWrite(motorOneB, LOW);
+                  digitalWrite(motorTwoA, HIGH);
+                  digitalWrite(motorTwoB, LOW);
+                  delay(500);
+
+                  // Both Backwards
+                  digitalWrite(motorOneA, LOW);
+                  digitalWrite(motorOneB, HIGH);
+                  digitalWrite(motorTwoA, LOW);
+                  digitalWrite(motorTwoB, HIGH);
+                  delay(500);
+
+                  // One Forward, One Backwards
+                  digitalWrite(motorOneA, HIGH);
+                  digitalWrite(motorOneB, LOW);
+                  digitalWrite(motorTwoA, LOW);
+                  digitalWrite(motorTwoB, HIGH);
+                  delay(500);
+
+                  // One Backwards, One Forward
+                  digitalWrite(motorOneA, LOW);
+                  digitalWrite(motorOneB, HIGH);
+                  digitalWrite(motorTwoA, HIGH);
+                  digitalWrite(motorTwoB, LOW);
+                  delay(500);
+                }
               </pre>
             </section>
           </div>
