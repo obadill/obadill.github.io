@@ -1,0 +1,27 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #1E1E1E;
+  display: flex;
+  flex-direction: row;
+}
+
+.button {
+  position: absolute;
+  color: #090909;
+  background: #e8e8e8;
+  padding: 0.5em 1em;
+  font-size: 18px;
+  border-radius: 0.5em;
+  cursor: pointer;
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s;
+}
+
+.button:hover {
+  border: 1px solid white;
+  box-shadow: 4px 4px 6px #c5c5c5, -2px -4px 6px #ffffff;
+}
