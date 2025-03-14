@@ -4,23 +4,635 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Final Project</title>
+    <title>Spotify MyThing</title>
 
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
 
-    <h1>Final Project</h1>
+    <h1>Final Project Documentation</h1>
     <div class="header">
-      <img src="imgs/Final/FinalCover.jpg" />
+      <img src="imgs/Final/carthing.jpg" />
       <div>
         <H3>Spotify MyThing</H3>
         <p>Octavio Badillo</p>
+        <p>March 14th, 2025</p>
         <p>HCDE 439</p><br>
       </div>
     </div>
 
     <div class="container">
+
+      <div>
+        <section>
+          <h3>
+            The Concept Overview
+          </h4>
+          <article>
+            For my final project, I created the <strong>Spotify MyThing</strong>, a device heavily inspired by the now-discontinued
+            <strong>Spotify Car Thing</strong>. The motivation behind this project comes from Spotify’s controversial decision
+            to <strong>end production</strong> and completely <strong>brick the product</strong>, leaving many users with a
+            piece of <strong>e-waste</strong>. Instead of paying a price (~$130 on eBay) for a device that no longer
+            functions, I wanted to build my own version that is <strong>cost-effective</strong>, <strong>functional</strong>,
+            and designed for <strong>everyday use</strong> but maybe for the desk instead :D
+          </article>
+        </section>
+      </div>
+
+      <div>
+        <section>
+          <h3>
+            How it Works
+          </h4>
+          <p>The Spotify MyThing shares similar core features of the Car Thing:</p>
+          <ul>
+            <li>A <strong>rotary encoder</strong> is used for <strong>adjusting volume</strong> while listening.</li>
+            <li>A <strong>3x2 matrix keypad</strong> serves as the <strong>primary input method</strong>, enabling controls for <strong>play, pause, skip(back & forward), loop, and shuffle</strong>.</li>
+            <li>An <strong>LCD screen</strong> displays essential playback information, such as the <strong>currently playing song, artist name, and a dynamic progress bar</strong>.</li>
+            <li>The device is powered by an <strong>ESP32</strong>, leveraging its <strong>Wi-Fi capabilities</strong> to fetch real-time playback data from <strong>Spotify’s API</strong>.</li>
+        </ul>
+        </section>
+      </div>
+
+      <div>
+        <section>
+          <h3>
+            Spotify MyThing Bills of Materials
+          </h4>
+          <ul>
+            <li>ESP-WROOM-32</li>
+            <li>1.8 Inch TFT LCD</li>
+            <li>Rotary Encoder</li>
+            <li>Key Switch Breakout Prototype PCB</li>
+            <li>200mA 100V Diodes</li>
+            <li>24 AWG Solid Core Wire</li>
+            <li>ELEGOO Double Sided Perfboards</li>
+          </ul>
+        </section>
+      </div>
+
+      <div>
+        <section>
+          <h3>
+            Schematic
+          </h4>
+          <img src="imgs/Final/schematic.jpg">
+          <p>
+            While the full schematic for the Spotify MyThing contains a large number of wires, the
+            circuit primarily revolves around three key components: the keyboard matrix, the LCD screen,
+            and the rotary encoder. In total, the project utilizes 16 GPIO pins on the ESP32 to ensure
+            full functionality.
+          </p>
+          <br>
+          <h4>Key Components</h2>
+          <ul>
+              <li>The keyboard matrix utilizes 5 GPIO pins, with 2 for rows and 3 for columns. The columns
+                are configured as input pull-ups removing the need for external resistors. Additionally,
+                diodes are used to prevent ghosting, ensuring accurate key presses.</li>
+
+              <li>The rotary encoder is relatively straightforward using 4 GPIO pins. The CLK and DT pins are
+                responsible for detecting movement direction, while the other two pins are used for 5V power and
+                ground.</li>
+
+              <li>The LCD screen is the most GPIO-intensive component, requiring multiple connections. Finding
+                the correct pin configuration for the ESP32 was a significant challenge due to the driver's
+                multiple pinout listings.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div>
+        <section>
+          <h3>Technical Implementation</h3>
+          <p>
+            While this project required a fair amount of time on the hardware side, the primary time sink was the software side,
+            except for the LCD, where I found the hardware setup to be more challenging. Below, I outline the three main
+            components that make up the core of the Spotify MyThing.
+          </p><br>
+
+          <div class="sideText">
+            <div>
+              <h4>Key Matrix</h4>
+              <article>
+                The key matrix serves as the backbone of the project, allowing users to interact with Spotify playback settings
+                through button presses. Normally, implementing individual buttons would require numerous GPIO pin connections.
+                Instead, we utilize a key matrix setup to reduce the required pin count.
+                <br><br>
+                The matrix works by indexing through a 2D array of rows and columns, detecting keypresses based on predefined
+                conditions. A debounce function is used to ensure stable key presses, prevent rapid API calls, and improve reliability.
+                Additionally, diodes are placed in the circuit to prevent unintended ghost key presses, ensuring current flows in a
+                controlled manner.
+              </article><br>
+            </div>
+            <div>
+              <img src="imgs/Final/Matrix.png">
+            </div>
+          </div>
+
+
+          <div class="sideText">
+            <div>
+              <h4>Rotary Encoder</h4>
+              <article>
+                The rotary encoder was intended to be the simplest component but turned out to be more challenging in practice.
+                The basic concept is straightforward: turning the encoder right increments a value, while turning left decrements it.
+                However, an issue came up where too many API calls were being sent, leading to unintended behaviors and ghosting.
+                <br><br>
+                Through hours of trial and error, I implemented a debounce function to limit the rate of API calls, ensuring only one
+                call is sent per interaction. While this resolved the issue, a downside is that it slightly slows down response time,
+                making fast rotary movements feel less intuitive.
+              </article><br>
+            </div>
+            <div>
+              <img src="imgs/Final/RotaryEncoder.png">
+            </div>
+          </div>
+
+          <div class="sideText">
+            <div>
+              <h4>LCD Display</h4>
+              <article>
+                The LCD is a crucial component, as it displays the Spotify playback information to the user, including the current song,
+                artist, and song progress. It also serves as the primary way for users to authenticate their Spotify account by displaying
+                the ESP32's IP address. If the ESP32 and the user are connected to the same WiFi network, authentication can occur and the
+                device can connect to your Spotify account.
+                <br><br>
+                In practice, setting up the LCD proved to be one of the most difficult tasks due to multiple faulty connections.
+                Hours of debugging and continuity testing were needed to ensure stable connections. One improvement for my future
+                iterations for the LCD sfotware would be the addition of an RTC module to track song progress independently, rather than
+                constantly fetching progress updates from the API.
+              </article>
+            </div>
+            <div>
+              <img src="imgs/Final/LCD.jpg">
+            </div>
+          </div>
+
+        </section>
+      </div>
+
+      <div class="circuit">
+        <section>
+          <h3>
+            The Final Product: The Spotify MyThing
+          </h4>
+          <img src="/imgs/Final/MyThing.jpg">
+          <article>
+            <a href="https://youtu.be/xVEF0GeGV7g">Check out the Spotify MyThing in Action!</a>
+            <br><br>
+            Even if it’s not the Gameboy BT as I had originally intended, I thoroughly enjoyed creating
+            the Spotify MyThing. I am proud of it and was happy to see that many others found it interesting. While it is still in its
+            prototype state, it serves as a great foundation for a project that I hope to improve upon during the break. Who knows? Maybe
+            I can even manufacture it, but maybe that’s thinking a little too big.
+            <br><br>
+            <h4>Future Improvements:</h4>
+            <ul>
+                <li>Design and 3D print an actual enclosure</li>
+                <li>Start looking into PCB design for better integration</li>
+                <li>Fix current software issues, including:</li>
+                <ul>
+                    <li>Implementing proper authentication token refreshing</li>
+                    <li>Using an RTC clock instead of an API call every 5000ms for tracking progress</li>
+                    <li>Displaying the track/album image</li>
+                    <li>Allowing for users to bound a device id to the MyThing</li>
+                </ul>
+                <li>Make it fully portable!</li>
+            </ul>
+          </article>
+        </section>
+      </div>
+
+      <div class="code">
+        <h3>Spotify MyThing Source Code</h3>
+        <section>
+          <pre>
+            /* Libraries */
+            #include &lt;Arduino.h&gt;
+            #include &lt;WiFi.h&gt;
+            #include &lt;WebServer.h&gt;
+            #include &lt;HTTPClient.h&gt;
+            #include &lt;base64.h&gt;
+            #include &lt;ArduinoJson.h&gt;
+            #include &lt;TFT_eSPI.h&gt;
+            #include "SPI.h"
+
+            /* Constants & Variables */
+
+            // Rotary Encoder
+            const int CLK = 36;
+            const int DT = 39;
+            long lastEncoderMove = 0;
+            int posCount = 30;
+            int curClk;
+            int prevClk;
+
+            // Matrix
+            const int row1 = 13;
+            const int row2 = 12;
+            const int col1 = 4;
+            const int col2 = 25;
+            const int col3 = 26;
+            const long DEBOUNCE_TIME = 200;
+            char keyMap[2][3] = { { '1', '2', '3' }, { '4', '5', '6' } };
+            bool prevState[2][3] = { { HIGH, HIGH, HIGH }, { HIGH, HIGH, HIGH } };
+            long lastPressTime[2][3] = { { 0, 0, 0 }, { 0, 0, 0 } };
+
+            // LCD
+            // #define TFT_MOSI 15
+            // #define TFT_SCLK 14
+            // #define TFT_CS   5
+            // #define TFT_DC   27
+            // #define TFT_RST  33
+
+            // TFT LCD
+            int rectWidth = 120;
+            int rectHeight = 10;
+            int progressX = 20;
+            int progressY = 140;
+            int songProgress = 0;
+            int songDuration = 0;
+            long lastUpdateTime = 0;
+
+            String songTitle;
+            String artistName;
+
+            // Wi-Fi
+
+            // Home
+            const char* SSID = "REPLACE_WIFI_NAME";
+            const char* PASSWORD = "REPLACE_PASSWORD";
+
+            // Spotify
+            const char* CLIENT_ID = "REPLACE_CLIENT_ID";
+            const char* CLIENT_SECRET = "REPLACE_CLIENT_SECRET";
+            const char* REDIRECT_URL = "http://PUT_ESP32_IP_ADDRESS_HERE/callback";
+            const char* TOKEN = "https://accounts.spotify.com/api/token";
+            const char* ENDPOINT = "https://api.spotify.com/v1/me/";
+            bool stateInitialization = false;
+            bool curShuffleState;
+            long lastAPIFetch = 0;
+            String curRepeatState;
+            String AccessToken = "";
+            JsonDocument Auth;
+            JsonDocument State;
+
+            /* Objects */
+            WebServer server(80);
+            WiFiClientSecure client;
+            TFT_eSPI tft = TFT_eSPI();
+
+            void authSetup() {
+              WiFi.begin(SSID, PASSWORD);
+
+              while (WiFi.status() != WL_CONNECTED) {
+                delay(100);
+                Serial.print(".");
+              }
+
+              // Debugging
+              Serial.println("");
+              Serial.print("Connected to ");
+              Serial.println(SSID);
+              Serial.print("IP Address: ");
+              Serial.println(WiFi.localIP());
+
+              displayIPAddress(WiFi.localIP().toString());
+
+              server.on("/", handleRoot);
+              server.on("/callback", handleSpotifyCallback);
+              server.begin();
+            }
+
+            void displayIPAddress(String ip) {
+              tft.fillScreen(TFT_BLACK);
+              tft.setRotation(3);
+              tft.setTextDatum(TL_DATUM);
+              tft.setTextSize(1);
+              tft.setTextColor(TFT_WHITE, TFT_BLACK);
+              tft.setCursor(5, 5);
+              tft.print("IP: " + ip);
+            }
+
+            void drawScreen(bool refresh = false) {
+              songTitle = State["item"]["name"].as &lt;String&gt;();
+              artistName = State["item"]["artists"][0]["name"].as &lt;String&gt;();
+              songProgress = State["progress_ms"].as &lt;int&gt;();
+              songDuration = State["item"]["duration_ms"].as &lt;int&gt;();
+
+              if (refresh) {
+                  tft.fillScreen(TFT_BLACK);
+                  tft.setRotation(3);
+
+                  tft.setTextDatum(TL_DATUM);
+                  tft.setCursor(10, 10);
+                  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+                  tft.setTextSize(2);
+                  tft.print("Artist:");
+
+                  tft.setCursor(10, 30);
+                  tft.setTextSize(1);
+                  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                  tft.print(artistName);
+
+                  tft.setCursor(10, 60);
+                  tft.setTextSize(2);
+                  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+                  tft.print("Song:");
+
+                  tft.setCursor(10, 80);
+                  tft.setTextSize(1);
+                  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                  tft.print(songTitle);
+
+                  int progressBarX = 10;
+                  int progressBarY = 110;
+                  int progressBarWidth = tft.width() - 20;
+                  int progressBarHeight = 10;
+                  int progressRadius = 5;
+
+                  tft.drawRoundRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight, progressRadius, TFT_WHITE);
+              }
+
+              // Progress Bar
+              float progressRatio = (float)songProgress / (float)songDuration;
+              int progressWidth = progressRatio * (tft.width() - 20);
+              tft.fillRoundRect(10 + 2, 110 + 2, (tft.width() - 24), 6, 3, TFT_BLACK);
+              tft.fillRoundRect(10 + 2, 110 + 2, progressWidth - 4, 6, 3, TFT_GREEN);
+            }
+
+            void setup() {
+               // For debugging
+              Serial.begin(115200);
+
+              // Initialize Display
+              tft.init();
+              tft.fillScreen(TFT_BLACK);
+
+              // Auth Setup
+              authSetup();
+
+              // Rotary Encode Setup
+              pinMode(CLK, INPUT);
+              pinMode(DT, INPUT);
+              prevClk = digitalRead(CLK);
+
+              // Matrix Setup
+              pinMode(row1, OUTPUT);
+              pinMode(row2, OUTPUT);
+              digitalWrite(row1, HIGH);
+              digitalWrite(row2, HIGH);
+              pinMode(col1, INPUT_PULLUP);
+              pinMode(col2, INPUT_PULLUP);
+              pinMode(col3, INPUT_PULLUP);
+            }
+
+            void loop() {
+              long currentMillis = millis();
+
+              server.handleClient();
+
+              if (!AccessToken.isEmpty()) {
+                  if (!stateInitialization) {
+                      playbackState();
+                      stateInitialization = true;
+                      drawScreen(true);
+                  }
+                  if (currentMillis - lastAPIFetch > 5000) {
+                    playbackState();
+                    lastAPIFetch = currentMillis;
+                    drawScreen(true);
+                }
+                drawScreen(false);
+                checkMatrix();
+                checkVol();
+              }
+            }
+
+            void checkVol() {
+              long curMillis = millis();
+
+              curClk = digitalRead(CLK);
+              if (curClk != prevClk) {
+                if (curMillis - lastEncoderMove >= 1750) {
+                  lastEncoderMove = curMillis;
+                  if (digitalRead(DT) != curClk) {
+                    posCount -= 10;
+                  } else {
+                    posCount += 10;
+                  }
+                  posCount = constrain(posCount, 0, 100);
+                  updateVol(posCount);
+                }
+              }
+              prevClk = curClk;
+            }
+
+            void updateVol(int newVol) {
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/volume?volume_percent=" + String(newVol);
+              http.begin(url);
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              http.addHeader("Content-Type", "application/json");
+              http.PUT(url);
+              http.end();
+            }
+
+            void checkMatrix() {
+              for (int row = 0; row < 2; row++) {
+                int rowPin = (row == 0) ? row1 : row2;
+                int colPins[3] = { col1, col2, col3 };
+                digitalWrite(rowPin, LOW);
+
+                for (int col = 0; col < 3; col++) {
+                  bool keyState = digitalRead(colPins[col]);
+                  long start = millis();
+
+                  if (keyState == LOW && prevState[row][col] == HIGH) {
+                    if (start - lastPressTime[row][col] >= DEBOUNCE_TIME) {
+                      matrixFunctions(keyMap[row][col]);
+                      lastPressTime[row][col] = start;
+                    }
+                  }
+                  prevState[row][col] = keyState;
+                }
+                digitalWrite(rowPin, HIGH);
+              }
+            }
+
+            void matrixFunctions(char key) {
+              switch (key) {
+                case '1':
+                  togglePause();
+                  break;
+                case '2':
+                  togglePlay();
+                  break;
+                case '3':
+                  toggleShuffle();
+                  break;
+                case '4':
+                  skipToPrevious();
+                  break;
+                case '5':
+                  skipForward();
+                  break;
+                case '6':
+                  toggleLoop();
+                  break;
+              }
+            }
+
+            void togglePause() {
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/pause";
+              http.begin(url);
+              http.addHeader("Content-Type", "application/json");
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              http.PUT(url);
+              http.end();
+            }
+
+            void togglePlay() {
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/play";
+              http.begin(url);
+              http.addHeader("Content-Type", "application/json");
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+
+              String reqBody = "{ \"position_ms\": 0 }";
+              http.PUT(reqBody);
+              http.end();
+            }
+
+            void toggleShuffle() {
+              playbackState();
+              bool newShuffleState = !curShuffleState;
+
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/shuffle?state=" + String(newShuffleState ? "true" : "false");
+              http.begin(url);
+              http.addHeader("Content-Type", "application/json");
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              http.PUT(url);
+              http.end();
+            }
+
+            void skipToPrevious() {
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/previous";
+              http.begin(url);
+              http.addHeader("Content-Type", "application/json");
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              http.POST(url);
+              http.end();
+            }
+
+            void skipForward() {
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/next";
+              http.begin(url);
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              http.addHeader("Content-Type", "application/json");
+              http.POST(url);
+              http.end();
+            }
+
+            void toggleLoop() {
+              playbackState();
+              String newRepeatState;
+              if (curRepeatState == "off") {
+                newRepeatState = "track";
+              } else if (curRepeatState == "track") {
+                newRepeatState = "context";
+              } else {
+                newRepeatState = "off";
+              }
+
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player/repeat?state=" + newRepeatState;
+              http.begin(url);
+              http.addHeader("Content-Type", "application/json");
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              http.PUT(url);
+              http.end();
+            }
+
+            void playbackState() {
+              HTTPClient http;
+              String url = String(ENDPOINT) + "player";
+
+              http.begin(url);
+              http.addHeader("Authorization", "Bearer " + AccessToken);
+              int res = http.GET();
+              String json = http.getString();
+              http.end();
+
+              deserializeJson(State, json);
+              curShuffleState = State["shuffle_state"].as&lt;bool&gt;();
+              curRepeatState = State["repeat_state"].as&lt;String&gt;();
+              posCount = State["device"]["volume_percent"].as&lt;int&gt;();
+            }
+
+            /* API & Server Handling */
+
+            void handleRoot() {
+              String loginPage = "&lt;html&gt;&lt;head&gt;&lt;title&gt;MySpotify Login&lt;/title&gt;&lt;/head&gt;&lt;body&gt;";
+              loginPage += "&lt;p&gt;Click below to log in with Spotify:&lt;/p&gt;";
+              loginPage += "&lt;a href=\"https://accounts.spotify.com/authorize?";
+              loginPage += "client_id=" + String(CLIENT_ID);
+              loginPage += "&response_type=code";
+              loginPage += "&redirect_uri=" + String(REDIRECT_URL);
+              loginPage += "&scope=user-read-currently-playing user-read-playback-state user-modify-playback-state";
+              loginPage += "\"&gt;&lt;button&gt;Login with Spotify&lt;/button&gt;&lt;/a&gt;";
+              loginPage += "&lt;/body&gt;&lt;/html&gt;";
+
+              server.send(200, "text/html", loginPage);
+            }
+
+            void handleSpotifyCallback() {
+              String code = server.arg("code");
+
+              if (code.length() > 0) {
+                if (fetchAccessToken(code)) {
+                  server.send(200, "text/html", "&lt;h1&gt;Connected to Spotify :D&lt;/h1&gt;&lt;p&gt;Successfully authenticated.
+                  You may close this tab.&lt;/p&gt;");
+                } else {
+                  server.send(500, "text/html", "&lt;h1&gt;Authentication Failed&lt;/h1&gt;&lt;p&gt;Could not retrieve access token.&lt;/p&gt;");
+                }
+              } else {
+                server.send(400, "text/html", "&lt;h1&gt;Error&lt;/h1&gt;&lt;p&gt;No authorization code received.&lt;/p&gt;");
+              }
+            }
+
+            bool fetchAccessToken(String code) {
+              HTTPClient http;
+              http.begin(TOKEN);
+              http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+              String authHeader = "Basic " + base64::encode(String(CLIENT_ID) + ":" + String(CLIENT_SECRET));
+              http.addHeader("Authorization", authHeader);
+
+              // POST Request
+              String requestBody = "grant_type=authorization_code";
+              requestBody += "&code=" + code;
+              requestBody += "&redirect_uri=" + String(REDIRECT_URL);
+              requestBody += "&client_id=" + String(CLIENT_ID);
+              requestBody += "&client_secret=" + String(CLIENT_SECRET);
+
+              int res = http.POST(requestBody);
+              String json = http.getString();
+              http.end();
+
+              deserializeJson(Auth, json);
+              if (Auth["access_token"].is&lt;String&gt;()) {
+                AccessToken = Auth["access_token"].as&lt;String&gt;();
+                return true;
+              }
+              return false;
+            }
+          </pre>
+        </section>
+      </div>
     </div>
 
   </body>
